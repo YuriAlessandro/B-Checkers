@@ -12,7 +12,7 @@ PROMOTES
     get_winner
     
 SEES
-    Table,  ANSWER = {fail, success}
+    Table
     
 CONSTANTS
     FIRST, SECOND
@@ -41,68 +41,46 @@ OPERATIONS
     
     cp <-- get_current_player = cp := current_player;
     
-    ww <-- move(pl,pc,rr,cc) =
+    move(pl,pc,rr,cc) =
     PRE pl : PLAYERS & pc : (0..11) & rr : (1..8) & cc : (1..8)
     THEN 
-        ANY xx, yy WHERE xx = pieces_positions1(pc) & yy = pieces_positions2(pc)
-        THEN
-            IF pl = P1 & (rr = FIRST(xx) +1) 
-            THEN pieces_positions1 := { pc |-> (rr,cc)} || ww := success
-            ELSE pieces_positions2 := { pc |-> (rr,cc)} || ww := success
-            END
+        IF pl = P1
+        THEN pieces_positions1 := { pc |-> (rr,cc)}
+        ELSE pieces_positions2 := { pc |-> (rr,cc)}
         END
+        
     END;
     
     ww <-- have_a_piece (rr, cc) =
     PRE rr : (1..8) & cc : (1..8)
     THEN
-        IF pieces_positions1~[{(rr, cc)}] /= {} or pieces_positions2~[{(rr, cc)}] /= {}
+        IF (rr, cc) : ran(pieces_positions1) or (rr, cc) : ran(pieces_positions2)
         THEN ww := yes
         ELSE ww:= no
         END
     END;
     
-    //    oo <-- move_potions(pl, pc) =
-    //    PRE pl : PLAYERS & pc : (0..11)
-    //    THEN 
-    //        ANY xx, yy WHERE xx = pieces_positions1(pc) & yy = pieces_positions2(pc)
-    //        THEN
-    //            IF pl = P1
-    //            THEN
-    //                ANY aoo 
-    //                WHERE ((pieces_positions1~[{(FIRST(xx) + 1, SECOND(xx) - 1)}] = {}) & (pieces_positions1~[{(FIRST(xx) + 1, SECOND(xx) + 1)}] = {})) => aoo = [-1,-1, (FIRST(xx) + 1), (SECOND(xx) + 1)] or aoo = [-1,-1,-1,-1]
-    //                THEN oo := aoo 
-    //                END 
-    //            ELSE oo := [-1,-1,-1,-1]
-    //            END
-    //            
-    //        END
-    //    END
-    //            ELSE
-    //                IF pieces_positions2~[{(FIRST(yy) - 1, SECOND(yy) + 1)}] = {}
-    //                THEN skip // posso ir pra direita
-    //                END
-    // rr = FST(pieces_positions1[pc]) + 1 // cc = second(pieces_positions1[pc])
+    oo <-- move_potions(pl, pc) =
+    PRE pl : PLAYERS & pc : (0..11)
+    THEN 
+        ANY xx, yy WHERE xx = pieces_positions1(pc) & yy = pieces_positions2(pc)
+        THEN
+            IF pl = P1 & pc /: checkers1 & pc : pieces1
+            THEN
+                ANY aoo 
+                WHERE aoo : (0..3) --> (-1..8) &
+                    (
+                        ((SECOND(xx) = 1 & (( FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)))=> aoo = [-1, -1, (FIRST(xx) + 1), (SECOND(xx) + 1)] ) or // esquina coluna 1.
+                        ((SECOND(xx) = 8 & (( FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions1)))=> aoo = [(FIRST(xx) + 1), (SECOND(xx)-1), -1, -1] ) or // esquina coluna 8.
+                        ((SECOND(xx):(2..7) & (( FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)) & (( FIRST(xx) + 1, SECOND(xx)-1) /: ran(pieces_positions1))) => aoo = [(FIRST(xx) + 1), (SECOND(xx)-1), (FIRST(xx) + 1), (SECOND(xx)+1)]) or //colunas de 2 a 7
+                         aoo = [-1, -1, -1, -1]
+                    )
+                    
+                THEN oo := aoo 
+                END 
+            END   
+        END
+    END
     
-    //    
-    //    tt <-- test(pl, pc) = 
-    //    PRE pl : PLAYERS & pc : (0..11)
-    //    THEN
-    //        ANY xx, yy WHERE xx: pieces_positions1[{pc}] & yy:pieces_positions2[{pc}]
-    //        THEN
-    //            IF pl = P1
-    //            THEN tt := FIRST(xx)
-    //            ELSE tt := SECOND(xx)
-    //            END
-    //        END
-    //    END
-    //    
-    //    play(pl,pc,rr,cc) = 
-    //        PRE pl : PLAYERS & pc : (0..11) & rr : (1..8) & cc : (1..8) & pl = current_player
-    //        THEN
-    //            IF is_checker(pc, pl) = no 
-    //            THEN skip // Se ta aumentando p/ P1 ou diminuido p/ P2 entao (se pode andar entao anda)
-    //            ELSE skip // se pode andar entao anda
-    //            END
 END
 
