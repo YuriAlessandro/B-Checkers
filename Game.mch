@@ -22,10 +22,10 @@ PROPERTIES
     SECOND = %(tt, cc). (tt : (1..8) & cc: (1..8) | cc)
     
 VARIABLES
-    pieces_positions1, pieces_positions2, current_player, current_array
+    pieces_positions1, pieces_positions2, current_player, current_array, current_piece
     
 INVARIANT
-    pieces_positions1 : pieces1 >-> POSITIONS & pieces_positions2 : pieces2 >-> POSITIONS & current_player : PLAYERS & current_array : (0..3)-->(0..8)
+    pieces_positions1 : pieces1 >-> POSITIONS & pieces_positions2 : pieces2 >-> POSITIONS & current_player : PLAYERS & current_array : (0..3)-->(0..8) & current_piece : (-1..11)
     
 INITIALISATION
     pieces_positions1, pieces_positions2  := {0 |-> (1,1), 1 |-> (1,3), 2 |-> (1,5), 3 |-> (1,7),
@@ -35,7 +35,8 @@ INITIALISATION
         4 |-> (7,1), 5 |-> (7,3), 6 |-> (7,5), 7 |-> (7,7),
         8 |-> (6,2), 9 |-> (6,4), 10 |-> (6,6), 11 |-> (6,8)} ||
     current_player :: PLAYERS || 
-    current_array := (0..3) * {0}
+    current_array := (0..3) * {0} ||
+    current_piece := -1
     
 OPERATIONS
     
@@ -43,22 +44,23 @@ OPERATIONS
     
     ca <-- get_current_array = ca := current_array;   
     
-    move(pc,rr,cc) =
-    PRE pc : (0..11) & rr : (1..8) & cc : (1..8) & (rr = current_array(0) or rr = current_array(2)) & (cc = current_array(1) or cc = current_array(3))
+    move(rr,cc) =
+    PRE current_piece : (0..11) & rr : (1..8) & cc : (1..8) & (rr = current_array(0) or rr = current_array(2)) & (cc = current_array(1) or cc = current_array(3))
     THEN  current_array := (0..3) * {0} ||
-        IF current_player = P1 & pc : pieces1
-        THEN pieces_positions1 := { pc |-> (rr,cc)} || current_player := P2 ||
+        IF current_player = P1 & current_piece : pieces1
+        THEN pieces_positions1 := pieces_positions1 <+ { current_piece |-> (rr,cc)} || current_player := P2 ||
             IF rr = 8
-            THEN promote_to_checker(pc, current_player) 
+            THEN promote_to_checker(current_piece, current_player) 
             END
         ELSE 
-            IF current_player = P2 & pc : pieces2
-            THEN pieces_positions2 := { pc |-> (rr,cc)} || current_player := P1 ||
+            IF current_player = P2 & current_piece : pieces2
+            THEN pieces_positions2 := pieces_positions2 <+ { current_piece |-> (rr,cc)} || current_player := P1 ||
                 IF rr = 1
-                THEN promote_to_checker(pc, current_player) 
+                THEN promote_to_checker(current_piece, current_player) 
                 END
             END
-        END
+        END ||
+        current_piece := -1
         
     END;
     
@@ -74,6 +76,7 @@ OPERATIONS
     oo <-- move_options(pc) =
     PRE pc : (0..11)
     THEN 
+        current_piece := pc ||
         ANY xx, yy WHERE xx = pieces_positions1(pc) & yy = pieces_positions2(pc)
         THEN
             IF current_player = P1 & pc /: checkers1 & pc : pieces1
@@ -154,7 +157,84 @@ OPERATIONS
                 END
             END   
         END
-    END
+    END;
     
-END
+    eat(pc, tg) =
+    PRE pc : (0..11) & tg :(0..11)
+    THEN
+        //PARA O P1
+        IF current_player = P1 & pc : pieces1 & tg : pieces2
+        THEN
+            // se tg estiver a esquerda
+            IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) - 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
+            THEN
+                //se não houver peça a esqueda para cima de tg
+                IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                THEN
+                    //move
+                    pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) - 2)} || current_player := P2 ||
+                    remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2 //||
+                    //transforma em dama
+                    //                    IF FIRST(pieces_positions1(pc)) = 8 
+                    //                    THEN promote_to_checker(current_piece, current_player)
+                    //                    END
+                END
+            ELSE
+                // se tg estiver a direita
+                IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) + 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
+                THEN
+                    //se não houver peça a direita para cima de tg
+                    IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                    THEN
+                        //move
+                        pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) + 2)} || current_player := P2 ||
+                        remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2 //||
+                        //transforma em dama
+                        //                    IF FIRST(pieces_positions1(pc)) = 8 
+                        //                    THEN promote_to_checker(current_piece, current_player)
+                        //                    END
+                    END
+                END
+            END
+            //////////////////////////////////////////////////////////
+        ELSE
+            //PARA O P2
+            IF current_player = P2 & pc : pieces2 & tg : pieces1
+            THEN
+                // se tg estiver a esquerda
+                IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) - 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions2(tg)))
+                THEN
+                    //se não houver peça a esuqeda para baixo de tg
+                    IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                    THEN
+                        //move
+                        pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) + 2 , SECOND(pieces_positions2(pc)) - 2)} || current_player := P1 ||
+                        remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1 //||
+                        //transforma em dama
+                        //                    IF FIRST(pieces_positions1(pc)) = 8 
+                        //                    THEN promote_to_checker(current_piece, current_player)
+                        //                    END
+                    END
+                ELSE
+                    // se tg estiver a direita
+                    IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) + 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions2(tg)))
+                    THEN
+                        //se não houver peça a esuqeda para cima de tg
+                        IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                        THEN
+                            //move
+                            pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) + 2 , SECOND(pieces_positions2(pc)) + 2)} || current_player := P2 ||
+                            remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1 //||
+                            //transforma em dama
+                            //                    IF FIRST(pieces_positions1(pc)) = 8 
+                            //                    THEN promote_to_checker(current_piece, current_player)
+                            //                    END
+                        END
+                    END   
+                END
+            END
+        END
+    END
+END 
+
 
