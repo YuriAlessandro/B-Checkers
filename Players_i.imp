@@ -1,0 +1,108 @@
+/* Players_i
+* Author: PedroArthur
+* Creation date: 12/06/2018
+*/
+
+IMPLEMENTATION Players_i
+REFINES Players
+CONCRETE_VARIABLES 
+    pieces_i, checkers_i
+INVARIANT 
+    pieces_i = (0..23) --> BOOL
+    & checkers_i = (0..23) --> BOOL
+    & !xx . (xx : (0..23) & checkers_i(xx) = TRUE => pieces_i(xx) = TRUE)
+    & pieces1 = %xx . (xx : (0..11) & pieces_i(xx) = TRUE | xx)
+    & pieces2 = %xx . (xx : (12..23) & pieces_i(xx) = TRUE | xx)
+    & checkers1 = %xx . (xx : (0..11) & checkers_i(xx) = TRUE | xx)
+    & checkers2 = %xx . (xx : (12..23) & checkers_i(xx) = TRUE | xx)
+    
+INITIALISATION
+    VAR ii IN
+        ii := 0;
+        WHILE (ii <= 23) DO 
+            pieces_i(ii) := TRUE;
+            checkers_i(ii) := FALSE;
+            ii := ii + 1
+        INVARIANT !nn . (nn:0..(ii-1) => (pieces_i(ii) = TRUE & 
+                    checkers_i(ii) = FALSE))
+        VARIANT (23 - ii)
+        END          
+    END
+OPERATIONS
+    remove_piece(pc,pl)=
+    BEGIN
+        IF pc:(0..11) & pc /: checkers1 & pc /: checkers2 & pl:PLAYERS
+        THEN
+            IF pl = P1
+            THEN pieces_i(pc) := FALSE //pieces1 := pieces1 - {pc}
+            ELSE pieces_i(pc + 12) := FALSE
+            END
+        END
+    END;
+    //
+    //    
+    //    remove_checker(pc,pl)=
+    //    PRE pc:(0..11) & (pc:checkers1 or pc:checkers2) & pl:PLAYERS 
+    //    THEN
+    //        IF pl = P1 & pc : checkers1
+    //        THEN pieces1, checkers1 := pieces1 - {pc}, checkers1 - {pc}
+    //        ELSE pieces2, checkers2 := pieces2 - {pc}, checkers2 - {pc}
+    //        END
+    //    END;
+    //
+    //    
+    //    promote_to_checker(pc,pl)=
+    //    PRE pc:(0..11) & pl:PLAYERS 
+    //    THEN
+    //        IF pl = P1 & pc:pieces1 & pc/:checkers1
+    //        THEN checkers1 := checkers1 \/ {pc}
+    //        ELSE IF pl = P2 & pc:pieces2 & pc/:checkers2
+    //            THEN checkers2 := checkers2 \/ {pc}
+    //            END
+    //        END
+    //    END;
+    //
+    //    
+    //    aa <-- is_checker(pc, pl)=
+    //    PRE pc:(0..11) & pl:PLAYERS 
+    //    THEN
+    //        IF (pl = P1 & pc:pieces1 & pc:checkers1) or (pl = P2 & pc:pieces2 & pc:checkers2)
+    //        THEN aa := yes
+    //        ELSE
+    //            aa := no
+    //        END 
+    //    END;
+    //
+    //    
+    ww <-- get_winner =
+    BEGIN
+        VAR ii, aa IN
+            aa := FALSE;
+            ii := 0;
+            WHILE (ii < 12 & aa = FALSE) DO
+                IF pieces_i(ii) = TRUE
+                THEN aa := TRUE
+                END
+            INVARIANT !nn . (nn:0..(ii-1) => (pieces_i(ii) = FALSE))
+            VARIANT 12 - ii
+            END;
+            IF aa = FALSE
+            THEN ww := P2
+            ELSE
+                aa := FALSE;
+                ii := 12;
+                WHILE (ii < 23 & aa = FALSE) DO
+                    IF pieces_i(ii) = TRUE
+                    THEN aa := TRUE
+                    END
+                INVARIANT !nn . (nn:12..(ii-1) => (pieces_i(ii) = FALSE))
+                VARIANT 12 - ii
+                END;
+                IF aa = FALSE
+                THEN ww := P1
+                END
+            END
+        END
+    END
+    
+END
