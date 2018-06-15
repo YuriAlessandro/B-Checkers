@@ -6,103 +6,137 @@
 IMPLEMENTATION Players_i
 REFINES Players
 CONCRETE_VARIABLES 
-    pieces_i, checkers_i
+    pieces1_i, pieces2_i, checkers1_i, checkers2_i
 INVARIANT 
-    pieces_i = (0..23) --> BOOL
-    & checkers_i = (0..23) --> BOOL
-    & !xx . (xx : (0..23) & checkers_i(xx) = TRUE => pieces_i(xx) = TRUE)
-    & pieces1 = %xx . (xx : (0..11) & pieces_i(xx) = TRUE | xx)
-    & pieces2 = %xx . (xx : (12..23) & pieces_i(xx) = TRUE | xx)
-    & checkers1 = %xx . (xx : (0..11) & checkers_i(xx) = TRUE | xx)
-    & checkers2 = %xx . (xx : (12..23) & checkers_i(xx) = TRUE | xx)
-    
+    pieces1_i : (0..11) --> BOOL & pieces2_i : (0..11) --> BOOL 
+    & checkers1_i : (0..11) --> BOOL & checkers2_i : (0..11) --> BOOL
+    & pieces1 = dom(pieces1_i |> {TRUE}) & pieces2 = dom(pieces2_i |> {TRUE})
+    & checkers1 = dom(checkers1_i |> {TRUE}) & checkers2 = dom(checkers2_i |> {TRUE})
 INITIALISATION
     VAR ii IN
         ii := 0;
-        WHILE (ii <= 23) DO 
-            pieces_i(ii) := TRUE;
-            checkers_i(ii) := FALSE;
+        WHILE (ii <= 11) DO 
+            pieces1_i(ii) := TRUE;
+            pieces2_i(ii) := TRUE;
+            checkers1_i(ii) := FALSE;
+            checkers2_i(ii) := FALSE;
             ii := ii + 1
-        INVARIANT !nn . (nn:0..(ii-1) => (pieces_i(ii) = TRUE & 
-                    checkers_i(ii) = FALSE))
-        VARIANT (23 - ii)
+        INVARIANT !nn . (nn:0..(ii-1) => (pieces1_i(ii) = TRUE & 
+                    checkers1_i(ii) = FALSE & pieces2_i(ii) = TRUE & 
+                    checkers2_i(ii) = FALSE))
+        VARIANT (11 - ii)
         END          
     END
 OPERATIONS
     remove_piece(pc,pl)=
     BEGIN
-        IF pc:(0..11) & pc /: checkers1 & pc /: checkers2 & pl:PLAYERS
-        THEN
-            IF pl = P1
-            THEN pieces_i(pc) := FALSE //pieces1 := pieces1 - {pc}
-            ELSE pieces_i(pc + 12) := FALSE
+        VAR ck1, ck2 IN
+            ck1 := checkers1_i(pc);
+            ck2 := checkers2_i(pc);
+            IF pc >= 0 & pc <= 11 & ck1 = FALSE & ck2 = FALSE & (pl = P1 or pl = P2)
+            THEN
+                IF pl = P1
+                THEN pieces1_i(pc) := FALSE
+                ELSE pieces2_i(pc) := FALSE
+                END
             END
         END
     END;
-    //
-    //    
-    //    remove_checker(pc,pl)=
-    //    PRE pc:(0..11) & (pc:checkers1 or pc:checkers2) & pl:PLAYERS 
-    //    THEN
-    //        IF pl = P1 & pc : checkers1
-    //        THEN pieces1, checkers1 := pieces1 - {pc}, checkers1 - {pc}
-    //        ELSE pieces2, checkers2 := pieces2 - {pc}, checkers2 - {pc}
-    //        END
-    //    END;
-    //
-    //    
-    //    promote_to_checker(pc,pl)=
-    //    PRE pc:(0..11) & pl:PLAYERS 
-    //    THEN
-    //        IF pl = P1 & pc:pieces1 & pc/:checkers1
-    //        THEN checkers1 := checkers1 \/ {pc}
-    //        ELSE IF pl = P2 & pc:pieces2 & pc/:checkers2
-    //            THEN checkers2 := checkers2 \/ {pc}
-    //            END
-    //        END
-    //    END;
-    //
-    //    
-    //    aa <-- is_checker(pc, pl)=
-    //    PRE pc:(0..11) & pl:PLAYERS 
-    //    THEN
-    //        IF (pl = P1 & pc:pieces1 & pc:checkers1) or (pl = P2 & pc:pieces2 & pc:checkers2)
-    //        THEN aa := yes
-    //        ELSE
-    //            aa := no
-    //        END 
-    //    END;
-    //
-    //    
+    
+    remove_checker(pc,pl)=
+    BEGIN
+        VAR ck1, ck2 IN
+            ck1 := checkers1_i(pc);
+            ck2 := checkers2_i(pc);
+            IF pc >= 0 & pc <= 11 & ck1 = TRUE or ck2 = TRUE & (pl = P1 or pl = P2) 
+            THEN
+                IF pl = P1 & ck1 = TRUE
+                THEN pieces1_i(pc) := FALSE; 
+                    checkers1_i(pc) := FALSE
+                ELSE IF pl= P2
+                    THEN pieces2_i(pc) := FALSE;
+                        checkers2_i(pc) := FALSE
+                    END
+                END
+            END
+        END    
+    END;
+    
+    promote_to_checker(pc,pl)=
+    BEGIN 
+        IF pc >= 0 & pc <= 11 & (pl = P1 or pl = P2) 
+        THEN
+            VAR pc1, pc2, ck1, ck2 IN
+                pc1 := pieces1_i(pc);
+                ck1 := checkers1_i(pc);
+                pc2 := pieces2_i(pc);
+                ck2 := checkers2_i(pc);
+                IF pl = P1 & pc1 = TRUE & ck1 = FALSE
+                THEN checkers1_i(pc) := TRUE
+                ELSE IF pl = P2 & pc2 = TRUE & ck2 = FALSE
+                    THEN checkers2_i(pc) := TRUE
+                    END
+                END
+            END
+        END
+    END;
+    
+    
+    aa <-- is_checker(pc, pl)=
+    BEGIN
+        IF pc >= 0 & pc <= 11 & (pl = P1 or pl = P2) 
+        THEN
+            VAR pc1, pc2, ck1, ck2 IN
+                pc1 := pieces1_i(pc);
+                pc2 := pieces2_i(pc);
+                ck1 := checkers1_i(pc);
+                ck2 := checkers2_i(pc);
+                IF (pl = P1 & pc1 = TRUE & ck1 = TRUE) or (pl = P2 & pc1 = TRUE & ck2 = TRUE)
+                THEN aa := yes
+                ELSE
+                    aa := no
+                END
+            END
+        END
+    END;
+    
     ww <-- get_winner =
     BEGIN
-        VAR ii, aa IN
+        VAR ii, aa, jj, bb IN
             aa := FALSE;
+            bb := FALSE;
             ii := 0;
+            jj := 0;
             WHILE (ii < 12 & aa = FALSE) DO
-                IF pieces_i(ii) = TRUE
-                THEN aa := TRUE
-                END
-            INVARIANT !nn . (nn:0..(ii-1) => (pieces_i(ii) = FALSE))
+                VAR tt IN
+                    tt := pieces1_i(ii); 
+                    IF tt = TRUE
+                    THEN aa := TRUE
+                    END
+                END;
+                ii := ii + 1
+            INVARIANT !nn . (nn:0..(ii-1) => (pieces1_i(ii) = FALSE))
             VARIANT 12 - ii
             END;
             IF aa = FALSE
             THEN ww := P2
             ELSE
-                aa := FALSE;
-                ii := 12;
-                WHILE (ii < 23 & aa = FALSE) DO
-                    IF pieces_i(ii) = TRUE
-                    THEN aa := TRUE
-                    END
-                INVARIANT !nn . (nn:12..(ii-1) => (pieces_i(ii) = FALSE))
-                VARIANT 12 - ii
+                WHILE (jj < 12 & bb = FALSE) DO
+                    VAR rr IN
+                        rr := pieces2_i(jj); 
+                        IF rr = TRUE 
+                        THEN bb := TRUE 
+                        END
+                    END;
+                    jj := jj + 1
+                INVARIANT !nn . (nn:0..(jj-1) => (pieces2_i(jj) = FALSE))
+                VARIANT 12 - jj
                 END;
-                IF aa = FALSE
+                IF bb = FALSE
                 THEN ww := P1
                 END
             END
+            
         END
-    END
-    
+    END 
 END
