@@ -33,10 +33,6 @@ INITIALISATION
     
 OPERATIONS
     
-    cp <-- get_current_player = cp := current_player;
-    
-    ca <-- get_current_array = ca := current_array;   
-    
     move(rr,cc) =
     PRE current_piece : (0..11) & rr : (1..8) & cc : (1..8) & (rr = current_array(0) or rr = current_array(2)) & (cc = current_array(1) or cc = current_array(3))
     THEN  current_array := (0..3) * {0} ||
