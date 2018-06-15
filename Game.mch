@@ -14,13 +14,6 @@ PROMOTES
 SEES
     Table
     
-CONSTANTS
-    FIRST, SECOND
-    
-PROPERTIES 
-    FIRST = %(tt, cc). (tt : (1..8) & cc: (1..8) | tt) &
-    SECOND = %(tt, cc). (tt : (1..8) & cc: (1..8) | cc)
-    
 VARIABLES
     pieces_positions1, pieces_positions2, current_player, current_array, current_piece
     
@@ -84,54 +77,54 @@ OPERATIONS
                 ANY aoo 
                 WHERE aoo : (0..3) --> (0..8) &
                     (
-                        (SECOND(xx) = 1                                                     // É a primeira coluna
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)     // Se não tiver peça de P1
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)     // Se não tiver peça de P2
-                            & aoo = {0|->0, 1|->0, 2|->(FIRST(xx) + 1), 3|->(SECOND(xx) + 1)}) or           // Atribuição I
-                        (SECOND(xx) = 8                                                     // É a última coluna
-                            & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions1)     // Se não tiver peça de P1  
-                            & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions2)     // Se não tiver peça de P2
-                            & aoo = {0|->(FIRST(xx) + 1), 1|->(SECOND(xx) - 1), 2|->0, 3|->0}) or          // Atribuição II
-                        (SECOND(xx):(2..7)                                                  // É qualquer coluna do meio
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)     // A direita não tem peça de 1  
-                            & (FIRST(xx) + 1, SECOND(xx)- 1) /: ran(pieces_positions1)      // A esquerda não tem peça de 1
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)     // A direita não tem peça de 2
-                            & (FIRST(xx) + 1, SECOND(xx)- 1) /: ran(pieces_positions2)      // A esquerda não tem peça de 2
-                            & aoo = {0|->(FIRST(xx) + 1), 1|->(SECOND(xx) - 1), 2|->(FIRST(xx) + 1), 3|->(SECOND(xx) + 1)})or // Atribuição III
-                        (SECOND(xx):(2..7)                                                  // Só possui peça na esquerda
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)     // A direita não tem peça de 1
-                            & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)     // A direita não tem peça de 2
-                            & ((FIRST(xx) + 1, SECOND(xx)- 1) : ran(pieces_positions1)      // A esquerda tem peça de 1 ou
-                                or (FIRST(xx) + 1, SECOND(xx)- 1) : ran(pieces_positions2)) // A esquerda tem peça de 2
-                            & aoo = {0|->0, 1|->0, 2|->(FIRST(xx) + 1), 3|->(SECOND(xx) + 1)})or // Atribuição IV
-                        (SECOND(xx):(2..7)                                                  // Só possui peça na direita
-                            & ((FIRST(xx) + 1, SECOND(xx) + 1) : ran(pieces_positions1)     // A direita tem peça de 1 ou 
-                                or (FIRST(xx) + 1, SECOND(xx) + 1) : ran(pieces_positions2))// A direita tem peça de 2
-                            & (FIRST(xx) + 1, SECOND(xx)- 1) /: ran(pieces_positions1)      // A esquerda não tem peça de 1
-                            & (FIRST(xx) + 1, SECOND(xx)- 1) /: ran(pieces_positions2)      // A esquerda não tem peça de 2
-                            & aoo = {0|->(FIRST(xx) + 1), 1|->(SECOND(xx) - 1), 2|->0, 3|->0})or // Atribuição V
+                        (prj2(NAT, NAT)(xx) = 1                                                     // É a primeira coluna
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)     // Se não tiver peça de P1
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)     // Se não tiver peça de P2
+                            & aoo = {0|->0, 1|->0, 2|->(prj1(NAT, NAT)(xx) + 1), 3|->(prj2(NAT, NAT)(xx) + 1)}) or           // Atribuição I
+                        (prj2(NAT, NAT)(xx) = 8                                                     // É a última coluna
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions1)     // Se não tiver peça de P1  
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions2)     // Se não tiver peça de P2
+                            & aoo = {0|->(prj1(NAT, NAT)(xx) + 1), 1|->(prj2(NAT, NAT)(xx) - 1), 2|->0, 3|->0}) or          // Atribuição II
+                        (prj2(NAT, NAT)(xx):(2..7)                                                  // É qualquer coluna do meio
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)     // A direita não tem peça de 1  
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) /: ran(pieces_positions1)      // A esquerda não tem peça de 1
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)     // A direita não tem peça de 2
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) /: ran(pieces_positions2)      // A esquerda não tem peça de 2
+                            & aoo = {0|->(prj1(NAT, NAT)(xx) + 1), 1|->(prj2(NAT, NAT)(xx) - 1), 2|->(prj1(NAT, NAT)(xx) + 1), 3|->(prj2(NAT, NAT)(xx) + 1)})or // Atribuição III
+                        (prj2(NAT, NAT)(xx):(2..7)                                                  // Só possui peça na esquerda
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)     // A direita não tem peça de 1
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)     // A direita não tem peça de 2
+                            & ((prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) : ran(pieces_positions1)      // A esquerda tem peça de 1 ou
+                                or (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) : ran(pieces_positions2)) // A esquerda tem peça de 2
+                            & aoo = {0|->0, 1|->0, 2|->(prj1(NAT, NAT)(xx) + 1), 3|->(prj2(NAT, NAT)(xx) + 1)})or // Atribuição IV
+                        (prj2(NAT, NAT)(xx):(2..7)                                                  // Só possui peça na direita
+                            & ((prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) : ran(pieces_positions1)     // A direita tem peça de 1 ou 
+                                or (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) : ran(pieces_positions2))// A direita tem peça de 2
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) /: ran(pieces_positions1)      // A esquerda não tem peça de 1
+                            & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx)- 1) /: ran(pieces_positions2)      // A esquerda não tem peça de 2
+                            & aoo = {0|->(prj1(NAT, NAT)(xx) + 1), 1|->(prj2(NAT, NAT)(xx) - 1), 2|->0, 3|->0})or // Atribuição V
                         (not(
-                                (SECOND(xx) = 1                                                       // É a primeira coluna
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)       // Se não tiver peça de P1
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
-                                (SECOND(xx) = 8                                                       // É a última coluna
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions1)       // Se não tiver peça de P1  
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2  
-                                (SECOND(xx):(2..7)                                                    // É qualquer coluna do meio
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions2)) or      // A esquerda não tem peça de 2
-                                (SECOND(xx):(2..7)                                                    // Só possui peça na esquerda
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
-                                    & (FIRST(xx) + 1, SECOND(xx) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
-                                    & ((FIRST(xx) + 1, SECOND(xx) - 1) : ran(pieces_positions1)       // A esquerda tem peça de 1 ou
-                                        or (FIRST(xx) + 1, SECOND(xx) - 1) : ran(pieces_positions2))) or  // A esquerda tem peça de 2
-                                (SECOND(xx):(2..7)                                                    // Só possui peça na direita
-                                    & ((FIRST(xx) + 1, SECOND(xx) + 1) : ran(pieces_positions1)       // A direita tem peça de 1 ou
-                                        or (FIRST(xx) + 1, SECOND(xx) + 1) : ran(pieces_positions2))  // A direita tem peça de 2
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions1)        // A esquerda não tem peça de 1
-                                    & (FIRST(xx) + 1, SECOND(xx) - 1) /: ran(pieces_positions2))       // A esquerda não tem peça de 2
+                                (prj2(NAT, NAT)(xx) = 1                                                       // É a primeira coluna
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)       // Se não tiver peça de P1
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
+                                (prj2(NAT, NAT)(xx) = 8                                                       // É a última coluna
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions1)       // Se não tiver peça de P1  
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2  
+                                (prj2(NAT, NAT)(xx):(2..7)                                                    // É qualquer coluna do meio
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions2)) or      // A esquerda não tem peça de 2
+                                (prj2(NAT, NAT)(xx):(2..7)                                                    // Só possui peça na esquerda
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
+                                    & ((prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) : ran(pieces_positions1)       // A esquerda tem peça de 1 ou
+                                        or (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) : ran(pieces_positions2))) or  // A esquerda tem peça de 2
+                                (prj2(NAT, NAT)(xx):(2..7)                                                    // Só possui peça na direita
+                                    & ((prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) : ran(pieces_positions1)       // A direita tem peça de 1 ou
+                                        or (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) + 1) : ran(pieces_positions2))  // A direita tem peça de 2
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions1)        // A esquerda não tem peça de 1
+                                    & (prj1(NAT, NAT)(xx) + 1, prj2(NAT, NAT)(xx) - 1) /: ran(pieces_positions2))       // A esquerda não tem peça de 2
                             )
                             & aoo = {0|->0, 1|->0, 2|->0, 3|->0}) // Não possui opções
                     )
@@ -144,54 +137,54 @@ OPERATIONS
                     ANY aoo 
                     WHERE aoo : (0..3) --> (0..8) &
                         (
-                            (SECOND(yy) = 1                                                          // É a primeira coluna
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)          // Se não tiver peça de P1
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)          // Se não tiver peça de P2
-                                & aoo = {0|->0, 1|->0, 2|->(FIRST(yy) - 1), 3|->(SECOND(yy) + 1)}) or  // Atribuição I
-                            (SECOND(yy) = 8                                                          // É a última coluna
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)          // Se não tiver peça de P1  
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2)          // Se não tiver peça de P2
-                                & aoo = {0|->(FIRST(yy) - 1), 1|->(SECOND(yy) - 1), 2|->0, 3|->0}) or   // Atribuição II
-                            (SECOND(yy):(2..7)                                                       // É qualquer coluna do meio
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)          // A direita não tem peça de 1  
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)          // A esquerda não tem peça de 1
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)          // A direita não tem peça de 2
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2)          // A esquerda não tem peça de 2
-                                & aoo = {0|->(FIRST(yy) - 1), 1|->(SECOND(yy) - 1), 2|->(FIRST(yy) - 1), 3|->(SECOND(yy) + 1)}) or  // Atribuição III
-                            (SECOND(yy):(2..7)                                                      // Só possui peça na esquerda
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)         // A direita não tem peça de 1  
-                                & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)         // A direita não tem peça de 2
-                                & ((FIRST(yy) - 1, SECOND(yy) - 1) : ran(pieces_positions1)         // A esquerda tem peça de 1 ou
-                                    or (FIRST(yy) - 1, SECOND(yy) - 1) : ran(pieces_positions2))    // A esquerda tem peça de 2
-                                & aoo = {0|->0, 1|->0, 2|->(FIRST(yy) - 1), 3|->(SECOND(yy) + 1)}) or // Atribuição IV
-                            (SECOND(yy):(2..7)                                                      // Só possui peça na direita
-                                & ((FIRST(yy) - 1, SECOND(yy) + 1) : ran(pieces_positions1)         // A direita tem peça de 1 ou  
-                                    or (FIRST(yy) - 1, SECOND(yy) + 1) : ran(pieces_positions2))    // A direita tem peça de 2
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)         // A esquerda não tem peça de 1
-                                & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2)         // A esquerda não tem peça de 2
-                                & aoo = {0|->(FIRST(yy) - 1), 1|->(SECOND(yy) - 1), 2|->0, 3|->0}) or // Atribuição V
+                            (prj2(NAT, NAT)(yy) = 1                                                          // É a primeira coluna
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)          // Se não tiver peça de P1
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)          // Se não tiver peça de P2
+                                & aoo = {0|->0, 1|->0, 2|->(prj1(NAT, NAT)(yy) - 1), 3|->(prj2(NAT, NAT)(yy) + 1)}) or  // Atribuição I
+                            (prj2(NAT, NAT)(yy) = 8                                                          // É a última coluna
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)          // Se não tiver peça de P1  
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2)          // Se não tiver peça de P2
+                                & aoo = {0|->(prj1(NAT, NAT)(yy) - 1), 1|->(prj2(NAT, NAT)(yy) - 1), 2|->0, 3|->0}) or   // Atribuição II
+                            (prj2(NAT, NAT)(yy):(2..7)                                                       // É qualquer coluna do meio
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)          // A direita não tem peça de 1  
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)          // A esquerda não tem peça de 1
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)          // A direita não tem peça de 2
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2)          // A esquerda não tem peça de 2
+                                & aoo = {0|->(prj1(NAT, NAT)(yy) - 1), 1|->(prj2(NAT, NAT)(yy) - 1), 2|->(prj1(NAT, NAT)(yy) - 1), 3|->(prj2(NAT, NAT)(yy) + 1)}) or  // Atribuição III
+                            (prj2(NAT, NAT)(yy):(2..7)                                                      // Só possui peça na esquerda
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)         // A direita não tem peça de 1  
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)         // A direita não tem peça de 2
+                                & ((prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) : ran(pieces_positions1)         // A esquerda tem peça de 1 ou
+                                    or (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) : ran(pieces_positions2))    // A esquerda tem peça de 2
+                                & aoo = {0|->0, 1|->0, 2|->(prj1(NAT, NAT)(yy) - 1), 3|->(prj2(NAT, NAT)(yy) + 1)}) or // Atribuição IV
+                            (prj2(NAT, NAT)(yy):(2..7)                                                      // Só possui peça na direita
+                                & ((prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) : ran(pieces_positions1)         // A direita tem peça de 1 ou  
+                                    or (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) : ran(pieces_positions2))    // A direita tem peça de 2
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)         // A esquerda não tem peça de 1
+                                & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2)         // A esquerda não tem peça de 2
+                                & aoo = {0|->(prj1(NAT, NAT)(yy) - 1), 1|->(prj2(NAT, NAT)(yy) - 1), 2|->0, 3|->0}) or // Atribuição V
                             (not(
-                                    (SECOND(yy) = 1                                                       // É a primeira coluna
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)       // Se não tiver peça de P1
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
-                                    (SECOND(yy) = 8                                                       // É a última coluna
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)       // Se não tiver peça de P1  
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
-                                    (SECOND(yy):(2..7)                                                    // É qualquer coluna do meio
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2)) or   // A direita não tem peça de 1
-                                    (SECOND(xx):(2..7)                                                    // Só possui peça na esquerda
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
-                                        & (FIRST(yy) - 1, SECOND(yy) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
-                                        & ((FIRST(yy) - 1, SECOND(yy) - 1) : ran(pieces_positions1)       // A esquerda tem peça de 1 ou
-                                            or (FIRST(yy) + 1, SECOND(yy) - 1) : ran(pieces_positions2))) or  // A esquerda tem peça de 2
-                                    (SECOND(yy):(2..7)                                                    // Só possui peça na direita
-                                        & ((FIRST(yy) - 1, SECOND(yy) + 1) : ran(pieces_positions1)       // A direita tem peça de 1 ou 
-                                            or (FIRST(yy) - 1, SECOND(yy) + 1) : ran(pieces_positions2))  // A direita tem peça de 2
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
-                                        & (FIRST(yy) - 1, SECOND(yy) - 1) /: ran(pieces_positions2))      // A esquerda não tem peça de 2
+                                    (prj2(NAT, NAT)(yy) = 1                                                       // É a primeira coluna
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)       // Se não tiver peça de P1
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
+                                    (prj2(NAT, NAT)(yy) = 8                                                       // É a última coluna
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)       // Se não tiver peça de P1  
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2)) or   // Se não tiver peça de P2
+                                    (prj2(NAT, NAT)(yy):(2..7)                                                    // É qualquer coluna do meio
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2)) or   // A direita não tem peça de 1
+                                    (prj2(NAT, NAT)(xx):(2..7)                                                    // Só possui peça na esquerda
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions1)       // A direita não tem peça de 1  
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) /: ran(pieces_positions2)       // A direita não tem peça de 2
+                                        & ((prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) : ran(pieces_positions1)       // A esquerda tem peça de 1 ou
+                                            or (prj1(NAT, NAT)(yy) + 1, prj2(NAT, NAT)(yy) - 1) : ran(pieces_positions2))) or  // A esquerda tem peça de 2
+                                    (prj2(NAT, NAT)(yy):(2..7)                                                    // Só possui peça na direita
+                                        & ((prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) : ran(pieces_positions1)       // A direita tem peça de 1 ou 
+                                            or (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) + 1) : ran(pieces_positions2))  // A direita tem peça de 2
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions1)       // A esquerda não tem peça de 1
+                                        & (prj1(NAT, NAT)(yy) - 1, prj2(NAT, NAT)(yy) - 1) /: ran(pieces_positions2))      // A esquerda não tem peça de 2
                                 )     
                                 &  aoo = {0|->0, 1|->0, 2|->0, 3|->0}) // Não possui opções
                         )
@@ -210,24 +203,24 @@ OPERATIONS
         IF current_player = P1 & pc : pieces1 & tg : pieces2
         THEN
             // se tg estiver a esquerda
-            IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) - 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
+            IF (prj1(NAT, NAT)(pieces_positions1(pc)) + 1, prj2(NAT, NAT)(pieces_positions1(pc)) - 1) = (prj1(NAT, NAT)(pieces_positions2(tg)), prj2(NAT, NAT)(pieces_positions2(tg)))
             THEN
                 //se não houver peça a esqueda para cima de tg
-                IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                IF (prj1(NAT, NAT)(pieces_positions2(tg)) + 1, prj2(NAT, NAT)(pieces_positions2(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
                 THEN
                     //move
-                    pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) - 2)} || current_player := P2 ||
+                    pieces_positions1 := pieces_positions1 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions1(pc)) + 2 , prj2(NAT, NAT)(pieces_positions1(pc)) - 2)} || current_player := P2 ||
                     remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2
                 END
             ELSE
                 // se tg estiver a direita
-                IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) + 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
+                IF (prj1(NAT, NAT)(pieces_positions1(pc)) + 1, prj2(NAT, NAT)(pieces_positions1(pc)) + 1) = (prj1(NAT, NAT)(pieces_positions2(tg)), prj2(NAT, NAT)(pieces_positions2(tg)))
                 THEN
                     //se não houver peça a direita para cima de tg
-                    IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                    IF (prj1(NAT, NAT)(pieces_positions2(tg)) + 1, prj2(NAT, NAT)(pieces_positions2(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
                     THEN
                         //move
-                        pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) + 2)} || current_player := P2 ||
+                        pieces_positions1 := pieces_positions1 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions1(pc)) + 2 , prj2(NAT, NAT)(pieces_positions1(pc)) + 2)} || current_player := P2 ||
                         remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2 //||
                     END
                 END
@@ -238,24 +231,24 @@ OPERATIONS
             IF current_player = P2 & pc : pieces2 & tg : pieces1
             THEN
                 // se tg estiver a esquerda
-                IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) - 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions1(tg)))
+                IF (prj1(NAT, NAT)(pieces_positions2(pc)) - 1, prj2(NAT, NAT)(pieces_positions2(pc)) - 1) = (prj1(NAT, NAT)(pieces_positions1(tg)), prj2(NAT, NAT)(pieces_positions1(tg)))
                 THEN
                     //se não houver peça a esuqeda para baixo de tg
-                    IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                    IF (prj1(NAT, NAT)(pieces_positions1(tg)) - 1, prj2(NAT, NAT)(pieces_positions1(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
                     THEN
                         //move
-                        pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) - 2 , SECOND(pieces_positions2(pc)) - 2)} || current_player := P1 ||
+                        pieces_positions2 := pieces_positions2 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions2(pc)) - 2 , prj2(NAT, NAT)(pieces_positions2(pc)) - 2)} || current_player := P1 ||
                         remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1 
                     END
                 ELSE
                     // se tg estiver a direita
-                    IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) + 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions1(tg)))
+                    IF (prj1(NAT, NAT)(pieces_positions2(pc)) - 1, prj2(NAT, NAT)(pieces_positions2(pc)) + 1) = (prj1(NAT, NAT)(pieces_positions1(tg)), prj2(NAT, NAT)(pieces_positions1(tg)))
                     THEN
                         //se não houver peça a esuqeda para cima de tg
-                        IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                        IF (prj1(NAT, NAT)(pieces_positions1(tg)) - 1, prj2(NAT, NAT)(pieces_positions1(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
                         THEN
                             //move
-                            pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) - 2 , SECOND(pieces_positions2(pc)) + 2)} || current_player := P1 ||
+                            pieces_positions2 := pieces_positions2 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions2(pc)) - 2 , prj2(NAT, NAT)(pieces_positions2(pc)) + 2)} || current_player := P1 ||
                             remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1
                         END
                     END   
