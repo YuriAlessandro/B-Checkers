@@ -6,19 +6,29 @@
 IMPLEMENTATION Game_i
 REFINES Game
     
+IMPORTS
+    Players
+    
+    //PROMOTES
+    //    get_winner
+    
 SEES
     Table
     
 CONCRETE_VARIABLES
-    row1, column1, row2, column2,current_piece, current_array, current_player
+    row1, column1, row2, column2, current_piece, current_array, current_player
     
 INVARIANT
-    row1 : (0..11) -->> (0..8) &
-    column1 : (0..11) -->> (0..8)  &
-    row2 : (0..11) -->> (0..8) &
-    column2 : (0..11) -->> (0..8) &
-    !pp.(pp:(0..11) => pieces_positions1(pp) = (row1(pp),column1(pp))) &
-    !pp.(pp:(0..11) => pieces_positions2(pp) = (row1(pp),column1(pp)))
+    row1 : (0..11) -->> (0..8) 
+    & column1 : (0..11) -->> (0..8)  
+    & row2 : (0..11) -->> (0..8) 
+    & column2 : (0..11) -->> (0..8) 
+    & !pp.(pp:(0..11) => pieces_positions1(pp) = (row1(pp),column1(pp))) 
+    & !pp.(pp:(0..11) => pieces_positions2(pp) = (row1(pp),column1(pp)))
+    // Invariante de Ligação com Players:
+    & ! rr . (rr : pieces1 => not(row1(rr) = 0))
+    & ! rr . (rr : pieces2 => not(row2(rr) = 0))
+    // Fim da invariante de Ligação com Players
     
     
 INITIALISATION    
@@ -74,18 +84,75 @@ INITIALISATION
     END
     
 LOCAL_OPERATIONS
-    ww <-- have_a_piece(rr, cc) =
-    BEGIN
-        PRE rr:(0..8) & cc:(0..8)
-        THEN
-            IF (rr:dom(row1) & cc:dom(column1)) or (rr:dom(row2) & cc:dom(column2))
-            THEN ww:= yes
-            ELSE ww := no
-            END
-        END
+    ww <-- have_a_piece (rr, cc) =
+    PRE rr : (1..8) & cc : (1..8)
+    THEN
+//        IF (rr, cc) : ran(pieces_positions1) or (rr, cc) : ran(pieces_positions2)
+//        THEN ww := yes
+//        ELSE ww:= no
+//        END
+        ww := yes
+    END;
+    
+    make_a_move(rr,cc) =
+    PRE rr : (1..8) & cc : (1..8)
+    THEN current_player := P2
     END
     
+    
 OPERATIONS
+    ww <-- have_a_piece(rr, cc) =
+    BEGIN
+        VAR aw IN
+            aw := no;
+            IF rr <= 1 & rr >= 8 & cc <= 1 & cc >= 8// : (1..8) & cc : (1..8)
+            THEN
+                VAR ii IN
+                    ii := 0;
+                    WHILE ii < 12 & aw = no DO
+                        IF (row1(ii) = rr & column1(ii) = cc) or (row2(ii) = rr & column2(ii) = cc)
+                        THEN
+                            aw := yes
+                        END;
+                        ii := ii +1
+                    INVARIANT aw = no & !pp. (pp:(0..ii-1) => (row1(pp) /= rr & column1(pp) /= cc) & (row2(pp) /= rr & column2(pp) /= cc))
+                    VARIANT (12-ii)
+                    END
+                END
+            END;
+            ww := aw
+        END
+    END;
+    
+    make_a_move(rr, cc) =
+    BEGIN
+        IF rr >= 1 & rr <= 8 & cc >= 1 & cc <= 8
+        THEN
+            current_array := (0..3) * {0}; // TALVEZ WHILE
+            IF current_player = P1 & current_piece <= 0 & current_piece >= 11
+            THEN 
+                row1(current_piece) := rr;
+                column1(current_piece) := cc;
+                current_player := P2;
+                IF rr = 8
+                THEN
+                    promote_to_checker(current_piece, current_player)
+                END
+            ELSE
+                IF current_player = P2 & current_piece <= 0 & current_piece >= 11
+                THEN 
+                    row2(current_piece) := rr;
+                    column2(current_piece) := cc;
+                    current_player := P1;
+                    IF rr = 1
+                    THEN promote_to_checker(current_piece, current_player) 
+                    END
+                END
+            END;
+            current_piece := -1
+        END
+    END;
+    
     cp <-- get_current_player = cp := current_player;
     
     ca <-- get_current_array = ca := current_array; 
@@ -117,30 +184,7 @@ OPERATIONS
             END;
             current_piece := -1
         END
-    END; 
-    
-    ww <-- have_a_piece(rr, cc) =
-    BEGIN
-        VAR aw IN
-            aw := no;
-            IF rr <= 1 & rr >= 8 & cc <= 1 & cc >= 8// : (1..8) & cc : (1..8)
-            THEN
-                VAR ii IN
-                    ii := 0;
-                    WHILE ii < 12 & aw = no DO
-                        IF (row1(ii) = rr & column1(ii) = cc) or (row2(ii) = rr & column2(ii) = cc)
-                        THEN
-                            aw := yes
-                        END;
-                        ii := ii +1
-                    INVARIANT aw = no & !pp. (pp:(0..ii-1) => (row1(pp) /= rr & column1(pp) /= cc) & (row2(pp) /= rr & column2(pp) /= cc))
-                    VARIANT (12-ii)
-                    END
-                END
-            END;
-            ww := aw
-        END
-    END; 
+    END;  
     
     oo <-- move_options(pc) =
     BEGIN
@@ -156,20 +200,20 @@ OPERATIONS
                 cc2 := column2(pc);     //coluna P1
                 
                 //P1 piece up left/right player
-                pcul1 := have_a_piece(rr1+1, cc1-1); //para p1 possui peça de p1 a esquerda 
-                pcur1 := have_a_piece(rr1+1, cc1+1); //para p1 possui peça de p1 a direita
-                pcul2 := have_a_piece(rr2+1, cc2-1); //para p1 possui peça de p2 a esquerda 
-                pcur2 := have_a_piece(rr2+1, cc2+1); //para p1 possui peça de p2 a direita
+                pcul1 <-- have_a_piece(rr1+1, cc1-1); //para p1 possui peça de p1 a esquerda 
+                pcur1 <-- have_a_piece(rr1+1, cc1+1); //para p1 possui peça de p1 a direita
+                pcul2 <-- have_a_piece(rr2+1, cc2-1); //para p1 possui peça de p2 a esquerda 
+                pcur2 <-- have_a_piece(rr2+1, cc2+1); //para p1 possui peça de p2 a direita
                 
                 //P2 piece down left/right player
-                pcdl1 := have_a_piece(rr1-1, cc1+1); //para p2 possui peça de p1 a esquerda 
-                pcdr1 := have_a_piece(rr1-1, cc1-1); //para p2 possui peça de p1 a d
-                pcdl2 := have_a_piece(rr2-1, cc2+1); //para p2 possui peça de p2 a esquerda 
-                pcdr2 := have_a_piece(rr2-1, cc2-1); //para p2 possui peça de p2 a direita
+                pcdl1 <-- have_a_piece(rr1-1, cc1+1); //para p2 possui peça de p1 a esquerda 
+                pcdr1 <-- have_a_piece(rr1-1, cc1-1); //para p2 possui peça de p1 a d
+                pcdl2 <-- have_a_piece(rr2-1, cc2+1); //para p2 possui peça de p2 a esquerda 
+                pcdr2 <-- have_a_piece(rr2-1, cc2-1); //para p2 possui peça de p2 a direita
                 
                 
                 //PARA O P1
-                IF current_player = P1 & pc /: checkers1 & rr1 /= 0 & cc1 /= 0 
+                IF current_player = P1 /* & pc /: checkers1 */ & rr1 /= 0 & cc1 /= 0 
                 THEN
                     IF cc1 = 1           // É a primeira coluna
                         & pcur1 = no     // Se não tiver peça de P1
@@ -206,7 +250,7 @@ OPERATIONS
                         aoo := {0|->0, 1|->0, 2|->0, 3|->0} // Não possui opções
                     END                    
                     //PARA O P2
-                ELSIF current_player = P2 & pc /: checkers2 & rr1 /= 0 & cc1 /= 0 
+                ELSIF current_player = P2 & /* pc /: checkers2 & */ rr1 /= 0 & cc1 /= 0 
                 THEN
                     IF cc2 = 1           // É a primeira coluna
                         & pcdr1 = no     // Se não tiver peça de P1
@@ -252,7 +296,7 @@ OPERATIONS
     
     eat(pc, tg) =
     BEGIN
-        VAR rr1, cc1, rr2, cc2, trr1, tcc1, trr2, tcc2, tgul2, tgur2, tgdl1, tgdr1 IN
+        VAR rr1, cc1, rr2, cc2, trr1, tcc1, trr2, tcc2, tgul2, tgur2, tgdl1, tgdr1, tgul1, tgur1, tgdl2, tgdr2 IN
             rr1 := row1(pc);        //linha P1
             cc1 := column1(pc);     //coluna P1
             rr2 := row2(pc);        //linha P2
@@ -264,13 +308,19 @@ OPERATIONS
             tcc2 := column2(tg);    //coluna P1
             
             //P1 piece up left/right player
+            tgul2 <-- have_a_piece(trr2+1, tcc2-1); //para p1 tg possui peça de p2 a esquerda 
+            tgur2 <-- have_a_piece(trr2+1, tcc2+1); //para p1 tg possui peça de p2 a direita
             
-            tgul2 := have_a_piece(trr2+1, tcc2-1); //para p1 tg possui peça de p2 a esquerda 
-            tgur2 := have_a_piece(trr2+1, tcc2+1); //para p1 tg possui peça de p2 a direita
+            tgul1 <-- have_a_piece(trr1+1, tcc1-1);
+            tgur1 <-- have_a_piece(trr1+1, tcc1+1);
+            tgdl2 <-- have_a_piece(trr1-1, tcc1+1);
+            tgdr2 <-- have_a_piece(trr1-1, tcc1-1);
             
             //P2 piece down left/right player
-            tgdl1 := have_a_piece(trr1-1, tcc1+1); //para p2 tg possui peça de p1 a esquerda 
-            tgdr1 := have_a_piece(trr1-1, tcc1-1); //para p2 tg possui peça de p1 a direita
+            
+            
+            tgdl1 <-- have_a_piece(trr1-1, tcc1+1); //para p2 tg possui peça de p1 a esquerda 
+            tgdr1 <-- have_a_piece(trr1-1, tcc1-1); //para p2 tg possui peça de p1 a direita
             
             
             IF pc >= 0 & pc >= 11 & tg >= 0 & tg >= 11 & ((rr1 /= 0 & cc1 /= 0 & trr2 /= 0 & tcc2 /= 0) or (rr2 /= 0 & cc2 /= 0 & trr1 /= 0 & tcc1 /= 0))
@@ -285,7 +335,7 @@ OPERATIONS
                         IF tgul1 = no & tgul2 = no 
                         THEN
                             //move
-                            move(trr2+1, tcc2-1);
+                            make_a_move(trr2+1, tcc2-1);
                             remove_piece(tg,P2);
                             row2(tg) := 0;
                             column2(tg) := 0
@@ -297,7 +347,7 @@ OPERATIONS
                         IF tgur1 = no & tgur2 = no
                         THEN
                             //move
-                            move(trr2+1, tcc2+1);
+                            make_a_move(trr2+1, tcc2+1);
                             remove_piece(tg,P2);
                             row2(tg) := 0;
                             column2(tg) := 0
@@ -313,7 +363,7 @@ OPERATIONS
                         IF tgdl1 = no & tgdl2 = no
                         THEN
                             //move
-                            move(trr2-1, tcc2-1);
+                            make_a_move(trr2-1, tcc2-1);
                             remove_piece(tg,P2);
                             row2(tg) := 0;
                             column2(tg) := 0
@@ -325,7 +375,7 @@ OPERATIONS
                         IF tgdr1 = no & tgdr2 = no
                         THEN
                             //move
-                            move(trr2+1, tcc2-1);
+                            make_a_move(trr2+1, tcc2-1);
                             remove_piece(tg,P2);
                             row2(tg) := 0;
                             column2(tg) := 0

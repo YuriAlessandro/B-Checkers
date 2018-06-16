@@ -5,22 +5,35 @@
 MACHINE
     Game
     
-INCLUDES
-    Players
+//INCLUDES
+//    Players
     
-PROMOTES
-    get_winner
+//PROMOTES
+//    get_winner
     
 SEES
     Table
     
+SETS
+    PLAYERS = {P1, P2}; ANSWER = {yes, no}   
+    
 VARIABLES
+    pieces1, pieces2, checkers1, checkers2,
     pieces_positions1, pieces_positions2, current_player, current_array, current_piece
     
 INVARIANT
-    pieces_positions1 : pieces1 >-> POSITIONS & pieces_positions2 : pieces2 >-> POSITIONS & current_player : PLAYERS & current_array : (0..3)-->(0..8) & current_piece : (-1..11)
+    pieces1 <: (0..11) 
+    & pieces2 <: (0..11)
+    & checkers1 <: pieces1 
+    & checkers2 <: pieces2
+    & pieces_positions1 : pieces1 >-> POSITIONS 
+    & pieces_positions2 : pieces2 >-> POSITIONS 
+    & current_player : PLAYERS 
+    & current_array : (0..3)-->(0..8) 
+    & current_piece : (-1..11)
     
 INITIALISATION
+    pieces1, pieces2, checkers1, checkers2 := (0..11),(0..11), {}, {} ||
     pieces_positions1, pieces_positions2  := {0 |-> (1,1), 1 |-> (1,3), 2 |-> (1,5), 3 |-> (1,7),
         4 |-> (2,2), 5 |-> (2,4), 6 |-> (2,6), 7 |-> (2,8),
         8 |-> (3,1), 9 |-> (3,3), 10 |-> (3,5), 11 |-> (3,7)},
@@ -42,12 +55,12 @@ OPERATIONS
         IF current_player = P1 & current_piece : pieces1
         THEN pieces_positions1 := pieces_positions1 <+ { current_piece |-> (rr,cc)} || current_player := P2 ||
             IF rr = 8
-            THEN promote_to_checker(current_piece, current_player) 
+            THEN pieces1, checkers1 := pieces1 - {current_piece}, checkers1 - {current_piece} //promote_to_checker(current_piece, current_player) 
             END
         ELSIF current_player = P2 & current_piece : pieces2
         THEN pieces_positions2 := pieces_positions2 <+ { current_piece |-> (rr,cc)} || current_player := P1 ||
             IF rr = 1
-            THEN promote_to_checker(current_piece, current_player) 
+            THEN pieces2, checkers2 := pieces2 - {current_piece}, checkers2 - {current_piece}//promote_to_checker(current_piece, current_player) 
             END
             
         END ||
@@ -55,14 +68,14 @@ OPERATIONS
         
     END;
     
-    ww <-- have_a_piece (rr, cc) =
-    PRE rr : (1..8) & cc : (1..8)
-    THEN
-        IF (rr, cc) : ran(pieces_positions1) or (rr, cc) : ran(pieces_positions2)
-        THEN ww := yes
-        ELSE ww:= no
-        END
-    END;
+//    ww <-- have_a_piece (rr, cc) =
+//    PRE rr : (1..8) & cc : (1..8)
+//    THEN
+//        IF (rr, cc) : ran(pieces_positions1) or (rr, cc) : ran(pieces_positions2)
+//        THEN ww := yes
+//        ELSE ww:= no
+//        END
+//    END;
     
     oo <-- move_options(pc) =
     PRE pc : (0..11)
@@ -208,7 +221,8 @@ OPERATIONS
                 THEN
                     //move
                     pieces_positions1 := pieces_positions1 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions1(pc)) + 2 , prj2(NAT, NAT)(pieces_positions1(pc)) - 2)} || current_player := P2 ||
-                    remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2
+                    /*remove_piece(tg,P2)*/ pieces2 := pieces2 - {tg} || checkers2 := checkers2 - {tg} || 
+                    pieces_positions2 := {tg} <<| pieces_positions2
                 END
                 // se tg estiver a direita
             ELSIF (prj1(NAT, NAT)(pieces_positions1(pc)) + 1, prj2(NAT, NAT)(pieces_positions1(pc)) + 1) = (prj1(NAT, NAT)(pieces_positions2(tg)), prj2(NAT, NAT)(pieces_positions2(tg)))
@@ -218,7 +232,8 @@ OPERATIONS
                 THEN
                     //move
                     pieces_positions1 := pieces_positions1 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions1(pc)) + 2 , prj2(NAT, NAT)(pieces_positions1(pc)) + 2)} || current_player := P2 ||
-                    remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2 //||
+                    /*remove_piece(tg,P2)*/ pieces2 := pieces2 - {tg} || checkers2 := checkers2 - {tg} || 
+                    pieces_positions2 := {tg} <<| pieces_positions2 //||
                 END
             END
             //PARA O P2
@@ -232,7 +247,8 @@ OPERATIONS
                 THEN
                     //move
                     pieces_positions2 := pieces_positions2 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions2(pc)) - 2 , prj2(NAT, NAT)(pieces_positions2(pc)) - 2)} || current_player := P1 ||
-                    remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1 
+                    /* remove_piece(tg,P1) */ pieces1 := pieces1 - {tg} || checkers1 := checkers1 - {tg} || 
+                    pieces_positions1 := {tg} <<| pieces_positions1 
                 END
                 // se tg estiver a direita
             ELSIF (prj1(NAT, NAT)(pieces_positions2(pc)) - 1, prj2(NAT, NAT)(pieces_positions2(pc)) + 1) = (prj1(NAT, NAT)(pieces_positions1(tg)), prj2(NAT, NAT)(pieces_positions1(tg)))
@@ -242,7 +258,8 @@ OPERATIONS
                 THEN
                     //move
                     pieces_positions2 := pieces_positions2 <+ { pc |-> (prj1(NAT, NAT)(pieces_positions2(pc)) - 2 , prj2(NAT, NAT)(pieces_positions2(pc)) + 2)} || current_player := P1 ||
-                    remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1
+                    /*remove_piece(tg,P1)*/ pieces1 := pieces1 - {tg} || checkers1 := checkers1 - {tg} || 
+                    pieces_positions1 := {tg} <<| pieces_positions1
                 END
             END   
         END
