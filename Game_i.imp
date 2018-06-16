@@ -10,17 +10,13 @@ SEES
     Table
     
 CONCRETE_VARIABLES
-    pieces_positions1_i, pieces_positions2_i
+    row1, column1, row2, column2,current_piece, current_array, current_player
     
 INVARIANT
-    row1 = (0..11) --> (0..8) &
-    column1 = (0..11) --> (0..8)  &
-    row2 = (0..11) --> (0..8) &
-    colunm2 = (0..11) --> (0..8) &
-    dom(row1) = (0..11) &
-    dom(column1) = (0..11)&
-    dom(row2) = (0..11) &
-    dom(column2) = (0..11) &
+    row1 : (0..11) -->> (0..8) &
+    column1 : (0..11) -->> (0..8)  &
+    row2 : (0..11) -->> (0..8) &
+    column2 : (0..11) -->> (0..8) &
     !pp.(pp:(0..11) => pieces_positions1(pp) = (row1(pp),column1(pp))) &
     !pp.(pp:(0..11) => pieces_positions2(pp) = (row1(pp),column1(pp)))
     
@@ -36,13 +32,13 @@ INITIALISATION
         WHILE rr <= 2 & pc < 12  DO
             cc := 0;
             WHILE cc <= 8 & pc < 12  DO
-                IF rr mod 2 = 0 & cc mod 2 = 0
+                IF (rr mod 2 = 0 & cc mod 2 = 0) or (rr mod 2 = 1 & cc mod 2 = 1) 
                 THEN 
                     row1(pc) := rr;
                     column1(pc) := cc;
-                    pc := pc+1;
+                    pc := pc+1
                 END;
-                cc := cc+1;
+                cc := cc+1
             INVARIANT
                 !pci.(pci:(0..pc-1)=> row1(pci) <= rr & column1(pci)<= cc)
             VARIANT (cc-8)
@@ -59,13 +55,13 @@ INITIALISATION
         WHILE rr >= 6 & pc < 12  DO
             cc := 0;
             WHILE cc <= 8 & pc < 12  DO
-                IF rr mod 2 = 0 & cc mod 2 = 0
+                IF (rr mod 2 = 0 & cc mod 2 = 0) or (rr mod 2 = 1 & cc mod 2 = 1)
                 THEN 
                     row2(pc) := rr;
                     column2(pc) := cc;
-                    pc := pc+1;
+                    pc := pc+1
                 END;
-                cc := cc+1;
+                cc := cc+1
             INVARIANT
                 !pci.(pci:(0..pc-1) => row1(pci) >= rr & column1(pci)<= cc)
             VARIANT (cc-8)
@@ -77,122 +73,266 @@ INITIALISATION
         END
     END
     
-    
-    
-    
-    //    pieces_positions1 := {0 |-> (1,1), 1 |-> (1,3), 2 |-> (1,5), 3 |-> (1,7),
-    //        4 |-> (2,2), 5 |-> (2,4), 6 |-> (2,6), 7 |-> (2,8),
-    //        8 |-> (3,1), 9 |-> (3,3), 10 |-> (3,5), 11 |-> (3,7)};
-    //    pieces_positions2  := {0 |-> (8,2), 1 |-> (8,4), 2 |-> (8,6), 3 |-> (8,8),
-    //        4 |-> (7,1), 5 |-> (7,3), 6 |-> (7,5), 7 |-> (7,7),
-    //        8 |-> (6,2), 9 |-> (6,4), 10 |-> (6,6), 11 |-> (6,8)};
-    
-    
 LOCAL_OPERATIONS
+    ww <-- have_a_piece(rr, cc) =
+    BEGIN
+        PRE rr:(0..8) & cc:(0..8)
+        THEN
+            IF (rr:dom(row1) & cc:dom(column1)) or (rr:dom(row2) & cc:dom(column2))
+            THEN ww:= yes
+            ELSE ww := no
+            END
+        END
+    END
+    
+OPERATIONS
     cp <-- get_current_player = cp := current_player;
     
-    ca <-- get_current_array = ca := current_array;   
-    
-OPERATIONS    
+    ca <-- get_current_array = ca := current_array; 
     
     move(rr,cc) =
     BEGIN
-        current_array := (0..3) * {0}; // TALVEZ WHILE
-        IF current_player = P1 & current_piece <= 0 & current_piece >= 11
-        THEN 
-            row1(current_piece) := rr;
-            column1(current_piece) := cc;//pieces_positions1 := pieces_positions1 <+ { current_piece |-> (rr,cc)} || current_player := P2 ||
-            IF rr = 8
-            THEN promote_to_checker(current_piece, current_player);
-            END;
-        ELSE
-            IF current_player = P2 & current_piece <= 0 & current_piece >= 11
-            THEN 
-                row2(current_piece) := rr;
-                column2(current_piece) := cc;
-                IF rr = 1
-                THEN promote_to_checker(current_piece, current_player); 
-                END;
-            END;
-        END;
-        current_piece := -1;
-    END;
-    
-    
-    ww <-- have_a_piece (rr, cc) =
-    BEGIN
-        IF rr <= 1 & rr >= 8 & cc <= 1 & cc >= 8// : (1..8) & cc : (1..8)
+        IF rr >= 1 & rr <= 8 & cc >= 1 & cc <= 8
         THEN
-           
-  
-    END;
+            current_array := (0..3) * {0}; // TALVEZ WHILE
+            IF current_player = P1 & current_piece <= 0 & current_piece >= 11
+            THEN 
+                row1(current_piece) := rr;
+                column1(current_piece) := cc;
+                current_player := P2;
+                IF rr = 8
+                THEN
+                    promote_to_checker(current_piece, current_player)
+                END
+            ELSE
+                IF current_player = P2 & current_piece <= 0 & current_piece >= 11
+                THEN 
+                    row2(current_piece) := rr;
+                    column2(current_piece) := cc;
+                    current_player := P1;
+                    IF rr = 1
+                    THEN promote_to_checker(current_piece, current_player) 
+                    END
+                END
+            END;
+            current_piece := -1
+        END
+    END; 
     
+    ww <-- have_a_piece(rr, cc) =
+    BEGIN
+        VAR aw IN
+            aw := no;
+            IF rr <= 1 & rr >= 8 & cc <= 1 & cc >= 8// : (1..8) & cc : (1..8)
+            THEN
+                VAR ii IN
+                    ii := 0;
+                    WHILE ii < 12 & aw = no DO
+                        IF (row1(ii) = rr & column1(ii) = cc) or (row2(ii) = rr & column2(ii) = cc)
+                        THEN
+                            aw := yes
+                        END;
+                        ii := ii +1
+                    INVARIANT aw = no & !pp. (pp:(0..ii-1) => (row1(pp) /= rr & column1(pp) /= cc) & (row2(pp) /= rr & column2(pp) /= cc))
+                    VARIANT (12-ii)
+                    END
+                END
+            END;
+            ww := aw
+        END
+    END; 
     
     oo <-- move_options(pc) =
-    
-     
+    BEGIN
+        IF pc >= 0 & pc >= 11
+        THEN 
+            current_piece := pc;
+            
+            VAR aoo, rr1, cc1, rr2, cc2, pcul1, pcur1, pcul2, pcur2, pcdl1, pcdr1, pcdl2, pcdr2 IN
+                aoo := (0..3)*{0};
+                rr1 := row1(pc);        //linha P1
+                cc1 := column1(pc);     //coluna P1
+                rr2 := row2(pc);        //linha P2
+                cc2 := column2(pc);     //coluna P1
+                
+                //P1 piece up left/right player
+                pcul1 := have_a_piece(rr1+1, cc1-1); //para p1 possui peça de p1 a esquerda 
+                pcur1 := have_a_piece(rr1+1, cc1+1); //para p1 possui peça de p1 a direita
+                pcul2 := have_a_piece(rr2+1, cc2-1); //para p1 possui peça de p2 a esquerda 
+                pcur2 := have_a_piece(rr2+1, cc2+1); //para p1 possui peça de p2 a direita
+                
+                //P2 piece down left/right player
+                pcdl1 := have_a_piece(rr1-1, cc1+1); //para p2 possui peça de p1 a esquerda 
+                pcdr1 := have_a_piece(rr1-1, cc1-1); //para p2 possui peça de p1 a d
+                pcdl2 := have_a_piece(rr2-1, cc2+1); //para p2 possui peça de p2 a esquerda 
+                pcdr2 := have_a_piece(rr2-1, cc2-1); //para p2 possui peça de p2 a direita
+                
+                
+                //PARA O P1
+                IF current_player = P1 & pc /: checkers1 & rr1 /= 0 & cc1 /= 0 
+                THEN
+                    IF cc1 = 1           // É a primeira coluna
+                        & pcur1 = no     // Se não tiver peça de P1
+                        & pcur2 = no     // Se não tiver peça de P2
+                    THEN
+                        aoo := {0|->0, 1|->0, 2|->(rr1+1), 3|->(cc1+1)}                // Atribuição I
+                    ELSIF cc1 = 8        // É a última coluna
+                        & pcul1 = no     // Se não tiver peça de P1  
+                        & pcul2 = no     // Se não tiver peça de P2
+                    THEN
+                        aoo := {0|->(rr1+1), 1|->(cc1-1), 2|->0, 3|->0}                // Atribuição II
+                    ELSIF cc1 >= 2 & cc1 <= 7 // É qualquer coluna do meio
+                        & pcur1 = no          // A direita não tem peça de 1  
+                        & pcul1 = no          // A esquerda não tem peça de 1
+                        & pcur2 = no          // A direita não tem peça de 2
+                        & pcul2 = no          // A esquerda não tem peça de 2
+                    THEN
+                        aoo := {0|->(rr1+1), 1|->(cc1-1), 2|->(rr1+1), 3|->(cc1+1)}  // Atribuição III
+                    ELSIF cc1 >= 2 & cc1 <= 7 // Só possui peça na esquerda
+                        & pcur1 = no          // A direita não tem peça de 1
+                        & pcur2 = no          // A direita não tem peça de 2
+                        & (pcul1 = yes        // A esquerda tem peça de 1 ou
+                            or pcul2 = no)    // A esquerda tem peça de 2
+                    THEN
+                        aoo := {0|->0, 1|->0, 2|->(rr1+1), 3|->(cc1+1)}              // Atribuição IV
+                    ELSIF cc1 >= 2 & cc1 <= 7 // Só possui peça na direita
+                        &  (pcur1 = yes       // A direita tem peça de 1 ou 
+                            or pcur2 = yes)   // A direita tem peça de 2
+                        & pcul1 = no          // A esquerda não tem peça de 1
+                        & pcul2 = no          // A esquerda não tem peça de 2
+                    THEN
+                        aoo := {0|->(rr1+1), 1|->(cc1-1), 2|->0, 3|->0}              // Atribuição V
+                    ELSE
+                        aoo := {0|->0, 1|->0, 2|->0, 3|->0} // Não possui opções
+                    END                    
+                    //PARA O P2
+                ELSIF current_player = P2 & pc /: checkers2 & rr1 /= 0 & cc1 /= 0 
+                THEN
+                    IF cc2 = 1           // É a primeira coluna
+                        & pcdr1 = no     // Se não tiver peça de P1
+                        & pcdr2 = no     // Se não tiver peça de P2
+                    THEN
+                        aoo := {0|->0, 1|->0, 2|->(rr2-1), 3|->(cc2+1)}                // Atribuição I
+                    ELSIF cc2 = 8        // É a última coluna
+                        & pcdl1 = no     // Se não tiver peça de P1  
+                        & pcdl2 = no     // Se não tiver peça de P2
+                    THEN
+                        aoo := {0|->(rr2-1), 1|->(cc2-1), 2|->0, 3|->0}                // Atribuição II
+                    ELSIF cc2 >= 2 & cc1 <= 7 // É qualquer coluna do meio
+                        & pcdr1 = no          // A direita não tem peça de 1  
+                        & pcdl1 = no          // A esquerda não tem peça de 1
+                        & pcdr2 = no          // A direita não tem peça de 2
+                        & pcdl2 = no          // A esquerda não tem peça de 2
+                    THEN
+                        aoo := {0|->(rr2-1), 1|->(cc2-1), 2|->(rr2-1), 3|->(cc2+1)}  // Atribuição III
+                    ELSIF cc2 >= 2 & cc2 <= 7 // Só possui peça na esquerda
+                        & pcdr1 = no          // A direita não tem peça de 1
+                        & pcdr2 = no          // A direita não tem peça de 2
+                        & (pcdl1 = yes        // A esquerda tem peça de 1 ou
+                            or pcdl2 = no)    // A esquerda tem peça de 2
+                    THEN
+                        aoo := {0|->0, 1|->0, 2|->(rr2-1), 3|->(cc2+1)}              // Atribuição IV
+                    ELSIF cc2 >= 2 & cc2 <= 7 // Só possui peça na direita
+                        &  (pcdr1 = yes       // A direita tem peça de 1 ou 
+                            or pcdr2 = yes)   // A direita tem peça de 2
+                        & pcdl1 = no          // A esquerda não tem peça de 1
+                        & pcdl2 = no          // A esquerda não tem peça de 2
+                    THEN
+                        aoo := {0|->(rr2-1), 1|->(cc2-1), 2|->0, 3|->0}              // Atribuição V
+                    ELSE
+                        aoo := {0|->0, 1|->0, 2|->0, 3|->0} // Não possui opções
+                    END
+                END;
+                current_array := aoo;
+                oo := aoo
+            END
+        END
     END;
     
     
     eat(pc, tg) =
-    PRE  pc:(0..11) & tg:(0..11) & ((pc : pieces1 & tg : pieces2) or (pc : pieces2 & tg : pieces1))
-    THEN
-        //PARA O P1
-        IF current_player = P1 & pc : pieces1 & tg : pieces2
-        THEN
-            // se tg estiver a esquerda
-            IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) - 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
+    BEGIN
+        VAR rr1, cc1, rr2, cc2, trr1, tcc1, trr2, tcc2, tgul2, tgur2, tgdl1, tgdr1 IN
+            rr1 := row1(pc);        //linha P1
+            cc1 := column1(pc);     //coluna P1
+            rr2 := row2(pc);        //linha P2
+            cc2 := column2(pc);     //coluna P1
+            
+            trr1 := row1(tg);       //linha P1
+            tcc1 := column1(tg);    //coluna P1
+            trr2 := row2(tg);       //linha P2
+            tcc2 := column2(tg);    //coluna P1
+            
+            //P1 piece up left/right player
+            
+            tgul2 := have_a_piece(trr2+1, tcc2-1); //para p1 tg possui peça de p2 a esquerda 
+            tgur2 := have_a_piece(trr2+1, tcc2+1); //para p1 tg possui peça de p2 a direita
+            
+            //P2 piece down left/right player
+            tgdl1 := have_a_piece(trr1-1, tcc1+1); //para p2 tg possui peça de p1 a esquerda 
+            tgdr1 := have_a_piece(trr1-1, tcc1-1); //para p2 tg possui peça de p1 a direita
+            
+            
+            IF pc >= 0 & pc >= 11 & tg >= 0 & tg >= 11 & ((rr1 /= 0 & cc1 /= 0 & trr2 /= 0 & tcc2 /= 0) or (rr2 /= 0 & cc2 /= 0 & trr1 /= 0 & tcc1 /= 0))
             THEN
-                //se não houver peça a esqueda para cima de tg
-                IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                //PARA O P1
+                IF current_player = P1 & (rr1 /= 0 & cc1 /= 0 & trr2 /= 0 & tcc2 /= 0)
                 THEN
-                    //move
-                    pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) - 2)} || current_player := P2 ||
-                    remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2
-                END
-            ELSE
-                // se tg estiver a direita
-                IF (FIRST(pieces_positions1(pc)) + 1, SECOND(pieces_positions1(pc)) + 1) = (FIRST(pieces_positions2(tg)), SECOND(pieces_positions2(tg)))
-                THEN
-                    //se não houver peça a direita para cima de tg
-                    IF (FIRST(pieces_positions2(tg)) + 1, SECOND(pieces_positions2(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                    // se tg estiver a esquerda
+                    IF (rr1+1) = trr2 & (cc1-1) = tcc2
                     THEN
-                        //move
-                        pieces_positions1 := pieces_positions1 <+ { pc |-> (FIRST(pieces_positions1(pc)) + 2 , SECOND(pieces_positions1(pc)) + 2)} || current_player := P2 ||
-                        remove_piece(tg,P2)|| pieces_positions2 := {tg} <<| pieces_positions2 //||
-                    END
-                END
-            END
-            //////////////////////////////////////////////////////////
-        ELSE
-            //PARA O P2
-            IF current_player = P2 & pc : pieces2 & tg : pieces1
-            THEN
-                // se tg estiver a esquerda
-                IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) - 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions1(tg)))
-                THEN
-                    //se não houver peça a esuqeda para baixo de tg
-                    IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) - 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
-                    THEN
-                        //move
-                        pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) - 2 , SECOND(pieces_positions2(pc)) - 2)} || current_player := P1 ||
-                        remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1 
-                    END
-                ELSE
-                    // se tg estiver a direita
-                    IF (FIRST(pieces_positions2(pc)) - 1, SECOND(pieces_positions2(pc)) + 1) = (FIRST(pieces_positions1(tg)), SECOND(pieces_positions1(tg)))
-                    THEN
-                        //se não houver peça a esuqeda para cima de tg
-                        IF (FIRST(pieces_positions1(tg)) - 1, SECOND(pieces_positions1(tg)) + 1) /: (ran(pieces_positions2) \/ ran(pieces_positions1)) 
+                        //se não houver peça a esqueda para cima de tg
+                        IF tgul1 = no & tgul2 = no 
                         THEN
                             //move
-                            pieces_positions2 := pieces_positions2 <+ { pc |-> (FIRST(pieces_positions2(pc)) - 2 , SECOND(pieces_positions2(pc)) + 2)} || current_player := P1 ||
-                            remove_piece(tg,P1)|| pieces_positions1 := {tg} <<| pieces_positions1
+                            move(trr2+1, tcc2-1);
+                            remove_piece(tg,P2);
+                            row2(tg) := 0;
+                            column2(tg) := 0
+                        END
+                        // se tg estiver a direita
+                    ELSIF (rr1+1) = trr2 & (cc1+1) = tcc2
+                    THEN
+                        //se não houver peça a direita para cima de tg
+                        IF tgur1 = no & tgur2 = no
+                        THEN
+                            //move
+                            move(trr2+1, tcc2+1);
+                            remove_piece(tg,P2);
+                            row2(tg) := 0;
+                            column2(tg) := 0
+                        END
+                    END
+                    //PARA O P2
+                ELSIF current_player = P2 & (rr2 /= 0 & cc2 /= 0 & trr1 /= 0 & tcc1 /= 0)
+                THEN
+                    // se tg estiver a esquerda
+                    IF (rr1-1) = trr2 & (cc1-1) = tcc2
+                    THEN
+                        //se não houver peça a esuqeda para baixo de tg
+                        IF tgdl1 = no & tgdl2 = no
+                        THEN
+                            //move
+                            move(trr2-1, tcc2-1);
+                            remove_piece(tg,P2);
+                            row2(tg) := 0;
+                            column2(tg) := 0
+                        END
+                        // se tg estiver a direita
+                    ELSIF (rr1-1) = trr2 & (cc1+1) = tcc2
+                    THEN
+                        //se não houver peça a esuqeda para cima de tg
+                        IF tgdr1 = no & tgdr2 = no
+                        THEN
+                            //move
+                            move(trr2+1, tcc2-1);
+                            remove_piece(tg,P2);
+                            row2(tg) := 0;
+                            column2(tg) := 0
                         END
                     END   
                 END
             END
         END
     END
-    
 END
