@@ -5,11 +5,11 @@
 MACHINE
     Game
     
-//INCLUDES
-//    Players
+    //INCLUDES
+    //    Players
     
-//PROMOTES
-//    get_winner
+    //PROMOTES
+    //    get_winner
     
 SEES
     Table
@@ -67,15 +67,6 @@ OPERATIONS
         current_piece := -1
         
     END;
-    
-//    ww <-- have_a_piece (rr, cc) =
-//    PRE rr : (1..8) & cc : (1..8)
-//    THEN
-//        IF (rr, cc) : ran(pieces_positions1) or (rr, cc) : ran(pieces_positions2)
-//        THEN ww := yes
-//        ELSE ww:= no
-//        END
-//    END;
     
     oo <-- move_options(pc) =
     PRE pc : (0..11)
