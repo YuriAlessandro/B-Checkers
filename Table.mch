@@ -7,6 +7,5 @@ MACHINE
 CONSTANTS
     POSITIONS
 PROPERTIES
-    POSITIONS = (1..8) * (1..8)    //(LINHA, COLUNA)
-    
+    POSITIONS = (1..8) * (1..8)    //(LINHA, COLUNA)    
 END

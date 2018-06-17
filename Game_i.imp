@@ -12,9 +12,9 @@ IMPORTS
     //PROMOTES
     //    get_winner
     
-SEES
-    Table
-    
+//SEES
+//    Table
+
 CONCRETE_VARIABLES
     row1, column1, row2, column2, current_piece, current_array, current_player
     
@@ -26,10 +26,9 @@ INVARIANT
     & !pp.(pp:(0..11) => pieces_positions1(pp) = (row1(pp),column1(pp))) 
     & !pp.(pp:(0..11) => pieces_positions2(pp) = (row1(pp),column1(pp)))
     // Invariante de Ligação com Players:
-    & ! rr . (rr : pieces1 => not(row1(rr) = 0))
-    & ! rr . (rr : pieces2 => not(row2(rr) = 0))
+    & ! rr . (rr : pieces1 => not(row1(rr) = 0 or column1(rr) = 0))
+    & ! rr . (rr : pieces2 => not(row2(rr) = 0 or column2(rr) = 0))
     // Fim da invariante de Ligação com Players
-    
     
 INITIALISATION    
     current_player := P1;

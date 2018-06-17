@@ -10,9 +10,9 @@ MACHINE
     
     //PROMOTES
     //    get_winner
-    
-SEES
-    Table
+//    
+//SEES
+//    Table
     
 SETS
     PLAYERS = {P1, P2}; ANSWER = {yes, no}   
@@ -26,8 +26,8 @@ INVARIANT
     & pieces2 <: (0..11)
     & checkers1 <: pieces1 
     & checkers2 <: pieces2
-    & pieces_positions1 : pieces1 >-> POSITIONS 
-    & pieces_positions2 : pieces2 >-> POSITIONS 
+    & pieces_positions1 : pieces1 >-> (1..8) * (1..8) 
+    & pieces_positions2 : pieces2 >-> (1..8) * (1..8)
     & current_player : PLAYERS 
     & current_array : (0..3)-->(0..8) 
     & current_piece : (-1..11)
