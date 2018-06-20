@@ -91,7 +91,7 @@ OPERATIONS
                 pc2 := pieces2_i(pc);
                 ck1 := checkers1_i(pc);
                 ck2 := checkers2_i(pc);
-                IF (pl = P1 & pc1 = TRUE & ck1 = TRUE) or (pl = P2 & pc1 = TRUE & ck2 = TRUE)
+                IF (pl = P1 & pc1 = TRUE & ck1 = TRUE) or (pl = P2 & pc2 = TRUE & ck2 = TRUE)
                 THEN aa := yes
                 ELSE
                     aa := no
